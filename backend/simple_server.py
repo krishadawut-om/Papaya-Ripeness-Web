@@ -15,7 +15,7 @@ app.config['UPLOAD_FOLDER'] = 'upload'
 model_path = 'P_model.h5'
 model = tf.keras.models.load_model(model_path)
 
-class_names =['Ripe', 'Partially Ripe', 'Unripe']
+class_names =['\"Ripe\"', '\"Partially Ripe\"', '\"Unripe\"']
 
 @app.route("/")
 def home():
@@ -34,18 +34,18 @@ def upload():
         imagepath = 'upload' + '\\' + ffilename
         img = cv2.resize(cv2.imread(imagepath),(224,224))
 
+        os.remove(imagepath)
+
         img_array = np.expand_dims(img, 0)        
 
         predictions = model.predict(img_array)
         # score = tf.nn.softmax(predictions[0])
         # print(score)
 
-        result = "This image likely to belongs to {} with a {:.2f} percent confidence.".format(class_names[np.argmax(predictions[0])], 100 * np.max(predictions[0]))
+        result = "This image is likely belongs to {} with {:.2f} percent confidence.".format(class_names[np.argmax(predictions[0])], 100 * np.max(predictions[0]))
 
         response = {'result': result}
         response_pickled = jsonpickle.encode(response)
-
-        os.remove(imagepath)
 
         return Response(response=response_pickled, status=200, mimetype="application/json")
 
